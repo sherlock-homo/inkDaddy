@@ -90,6 +90,7 @@
 - [x] Add worker-driven automatic hub update execution through `/opt/inkdaddy/bin/inkdaddy-update`.
 - [x] Add release asset builder for source archives, checksums, and optional XIAO MG24 firmware artifacts.
 - [x] Add firmware OTA manifest endpoint and portable XIAO MG24 OTA safety-gate scaffold.
+- [x] Add retrying hub-update health checks and safe post-health version stamping for Proxmox OTA.
 - [ ] Implement SiSDK rollback-safe firmware OTA path on hardware.
 
 ## Phase 10 - Matter Control/Status Expansion

@@ -13,6 +13,8 @@ RELEASE_SHA256="${INKDADDY_RELEASE_SHA256:-}"
 ALLOW_UNSIGNED="${INKDADDY_ALLOW_UNSIGNED_UPDATE:-0}"
 WORK_DIR="${INKDADDY_UPDATE_WORK_DIR:-${INSTALL_DIR}/updates}"
 HEALTH_URL="${INKDADDY_HEALTH_URL:-http://127.0.0.1:8080/api/health}"
+HEALTH_ATTEMPTS="${INKDADDY_HEALTH_ATTEMPTS:-30}"
+HEALTH_DELAY_SECONDS="${INKDADDY_HEALTH_DELAY_SECONDS:-2}"
 
 if [[ -f "$CONFIG_FILE" ]]; then
   set -a
@@ -21,6 +23,9 @@ if [[ -f "$CONFIG_FILE" ]]; then
   set +a
   VERSION="$REQUESTED_VERSION"
   REPO_RAW="${INKDADDY_GITHUB_REPO:-${INKDADDY_REPO:-$REPO_RAW}}"
+  HEALTH_URL="${INKDADDY_HEALTH_URL:-$HEALTH_URL}"
+  HEALTH_ATTEMPTS="${INKDADDY_HEALTH_ATTEMPTS:-$HEALTH_ATTEMPTS}"
+  HEALTH_DELAY_SECONDS="${INKDADDY_HEALTH_DELAY_SECONDS:-$HEALTH_DELAY_SECONDS}"
 fi
 
 log() {
@@ -116,6 +121,39 @@ path.write_text("\n".join(out) + "\n", encoding="utf-8")
 PY
 }
 
+read_source_version() {
+  local pyproject="${1:-${SRC_DIR}/pyproject.toml}"
+  if [[ ! -f "$pyproject" ]]; then
+    return 0
+  fi
+  python3 - "$pyproject" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+text = Path(sys.argv[1]).read_text(encoding="utf-8")
+match = re.search(r'^version\s*=\s*"([^"]+)"', text, re.MULTILINE)
+if match:
+    print(f"v{match.group(1)}")
+PY
+}
+
+wait_for_health() {
+  local attempts="$HEALTH_ATTEMPTS"
+  local delay="$HEALTH_DELAY_SECONDS"
+  local attempt
+
+  for ((attempt = 1; attempt <= attempts; attempt += 1)); do
+    if curl -fsS "$HEALTH_URL" >/dev/null; then
+      return 0
+    fi
+    log "Health check attempt ${attempt}/${attempts} failed; retrying in ${delay}s"
+    sleep "$delay"
+  done
+
+  return 1
+}
+
 install_source_tree() {
   local source_tree="$1"
   log "Updating Python environment"
@@ -178,6 +216,8 @@ main() {
   local extract_dir="${release_dir}/extract"
   local prepared_dir="${release_dir}/src.new"
   local resolved_version="$VERSION"
+  local previous_version
+  previous_version="$(read_source_version "$SRC_DIR/pyproject.toml")"
 
   mkdir -p "$release_dir" "${INSTALL_DIR}/bin"
 
@@ -211,7 +251,10 @@ main() {
     install_source_tree "$SRC_DIR"
     systemctl daemon-reload
     systemctl restart inkdaddy.service inkdaddy-worker.service
-    curl -fsS "$HEALTH_URL" >/dev/null
+    wait_for_health
+    update_config_version "$VERSION"
+    systemctl restart inkdaddy.service inkdaddy-worker.service
+    wait_for_health
     log "Update complete"
     return
   else
@@ -249,13 +292,21 @@ main() {
     systemctl daemon-reload
     systemctl restart inkdaddy.service inkdaddy-worker.service
     log "Health check"
-    if curl -fsS "$HEALTH_URL" >/dev/null; then
-      rm -rf "${SRC_DIR}.rollback"
-      log "Update complete"
-      return
+    if wait_for_health; then
+      update_config_version "$resolved_version"
+      systemctl restart inkdaddy.service inkdaddy-worker.service
+      log "Health check after version stamp"
+      if wait_for_health; then
+        rm -rf "${SRC_DIR}.rollback"
+        log "Update complete"
+        return
+      fi
     fi
   fi
 
+  if [[ -n "$previous_version" ]]; then
+    update_config_version "$previous_version" || true
+  fi
   rollback_code
   log "Update failed; rolled back where practical."
   exit 1

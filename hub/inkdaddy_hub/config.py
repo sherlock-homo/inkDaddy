@@ -12,7 +12,7 @@ DEFAULT_DATA_DIR = REPO_ROOT / ".inkdaddy-data"
 @dataclass(frozen=True)
 class HubSettings:
     app_name: str = "inkDaddy"
-    version: str = "0.1.2"
+    version: str = "0.1.3"
     host: str = "0.0.0.0"
     port: int = 8080
     data_dir: Path = DEFAULT_DATA_DIR
@@ -40,7 +40,7 @@ class HubSettings:
         repo = os.getenv("INKDADDY_GITHUB_REPO") or os.getenv("INKDADDY_REPO")
         return cls(
             app_name=os.getenv("INKDADDY_APP_NAME", "inkDaddy"),
-            version=os.getenv("INKDADDY_VERSION", "0.1.2"),
+            version=os.getenv("INKDADDY_VERSION", "0.1.3"),
             host=os.getenv("INKDADDY_HOST", "0.0.0.0"),
             port=int(os.getenv("INKDADDY_PORT", "8080")),
             data_dir=data_dir,
