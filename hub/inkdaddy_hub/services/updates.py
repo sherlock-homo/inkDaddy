@@ -3,6 +3,8 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import shlex
+import shutil
 import re
 import subprocess
 import time
@@ -381,6 +383,52 @@ def start_hub_update(
             env["INKDADDY_RELEASE_TARBALL_URL"] = update_info.tarball_url
 
     log_path = _job_log_path(settings)
+    systemd_run = shutil.which("systemd-run")
+    if systemd_run:
+        unit_name = f"inkdaddy-update-{int(time.time())}"
+        args = [
+            systemd_run,
+            "--unit",
+            unit_name,
+            "--collect",
+            "--quiet",
+            "--property",
+            "Type=simple",
+        ]
+        for key in (
+            "INKDADDY_GITHUB_REPO",
+            "INKDADDY_UPDATE_VERSION",
+            "INKDADDY_RELEASE_ASSET_URL",
+            "INKDADDY_RELEASE_SHA256",
+            "INKDADDY_RELEASE_TARBALL_URL",
+        ):
+            if env.get(key):
+                args.append(f"--setenv={key}={env[key]}")
+        args.extend(
+            [
+                "/bin/bash",
+                "-lc",
+                f"exec {shlex.quote(str(command))} >> {shlex.quote(str(log_path))} 2>&1",
+            ]
+        )
+        try:
+            subprocess.run(args, check=True, stdin=subprocess.DEVNULL)
+        except subprocess.CalledProcessError as exc:
+            return {
+                "accepted": False,
+                "status": "launch_failed",
+                "detail": f"systemd-run failed with exit code {exc.returncode}.",
+                "requested_version": requested_version,
+                "log_path": str(log_path),
+            }
+        return {
+            "accepted": True,
+            "status": "started",
+            "unit": unit_name,
+            "log_path": str(log_path),
+            "requested_version": requested_version,
+        }
+
     log_handle = log_path.open("ab")
     process = subprocess.Popen(
         [str(command)],
