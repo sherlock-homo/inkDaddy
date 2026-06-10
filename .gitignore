@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+
+hub/frontend/node_modules/
+hub/frontend/dist/
+hub/frontend/.vite/
+hub/frontend/tsconfig.tsbuildinfo
+
+.DS_Store
+*.log

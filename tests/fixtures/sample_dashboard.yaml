@@ -1,0 +1,54 @@
+version: 1
+name: Home Overview
+target:
+  width: 800
+  height: 480
+  palette: waveshare_7color_6
+grid:
+  cols: 4
+  rows: 2
+widgets:
+  - id: living_room_temp
+    type: big_number
+    x: 0
+    y: 0
+    w: 1
+    h: 1
+    source:
+      type: home_assistant
+      entity_id: sensor.living_room_temperature
+  - id: weather
+    type: weather_summary
+    x: 1
+    y: 0
+    w: 2
+    h: 1
+    source:
+      type: home_assistant
+      entity_id: weather.home
+  - id: front_door
+    type: on_off_state
+    x: 3
+    y: 0
+    w: 1
+    h: 1
+    source:
+      type: home_assistant
+      entity_id: binary_sensor.front_door
+  - id: energy
+    type: line_chart
+    x: 0
+    y: 1
+    w: 2
+    h: 1
+    source:
+      type: home_assistant
+      entity_id: sensor.energy_today
+  - id: note
+    type: text_note
+    x: 2
+    y: 1
+    w: 2
+    h: 1
+    options:
+      text: Trash night

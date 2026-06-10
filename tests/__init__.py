@@ -1,0 +1,1 @@
+"""inkDaddy tests."""

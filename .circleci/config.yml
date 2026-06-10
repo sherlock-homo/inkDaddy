@@ -1,0 +1,32 @@
+version: 2.1
+
+jobs:
+  backend-tests:
+    docker:
+      - image: cimg/python:3.12
+    steps:
+      - checkout
+      - run: python -m venv .venv
+      - run: . .venv/bin/activate && pip install -e ".[dev]"
+      - run: . .venv/bin/activate && pytest
+
+  frontend-build:
+    docker:
+      - image: cimg/node:22.11
+    steps:
+      - checkout
+      - run:
+          working_directory: hub/frontend
+          command: npm ci
+      - run:
+          working_directory: hub/frontend
+          command: npm run typecheck
+      - run:
+          working_directory: hub/frontend
+          command: npm run build
+
+workflows:
+  test:
+    jobs:
+      - backend-tests
+      - frontend-build
