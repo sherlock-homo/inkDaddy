@@ -15,6 +15,7 @@ export const navItems = [
   ["connect", "Connect inkDaddy"],
   ["photos", "Manage Photos"],
   ["dashboards", "Dashboards"],
+  ["integrations", "Integrations"],
   ["devices", "Devices"],
   ["home-assistant", "Home Assistant"],
   ["settings", "Settings"],

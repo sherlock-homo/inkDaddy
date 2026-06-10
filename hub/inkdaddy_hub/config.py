@@ -5,16 +5,19 @@ from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_DATA_DIR = REPO_ROOT / ".inkdaddy-data"
+
 
 @dataclass(frozen=True)
 class HubSettings:
     app_name: str = "inkDaddy"
-    version: str = "0.1.0"
+    version: str = "0.1.1"
     host: str = "0.0.0.0"
     port: int = 8080
-    data_dir: Path = Path("/opt/inkdaddy/data")
-    database_url: str = "sqlite:////opt/inkdaddy/data/inkdaddy.db"
-    secrets_path: Path = Path("/opt/inkdaddy/data/secrets.json")
+    data_dir: Path = DEFAULT_DATA_DIR
+    database_url: str = f"sqlite:///{DEFAULT_DATA_DIR / 'inkdaddy.db'}"
+    secrets_path: Path = DEFAULT_DATA_DIR / "secrets.json"
     frontend_dist: Path = Path(__file__).resolve().parents[1] / "frontend" / "dist"
     default_width: int = 800
     default_height: int = 480
@@ -33,11 +36,11 @@ class HubSettings:
 
     @classmethod
     def from_env(cls) -> "HubSettings":
-        data_dir = Path(os.getenv("INKDADDY_DATA_DIR", "/opt/inkdaddy/data"))
+        data_dir = Path(os.getenv("INKDADDY_DATA_DIR", str(DEFAULT_DATA_DIR)))
         repo = os.getenv("INKDADDY_GITHUB_REPO") or os.getenv("INKDADDY_REPO")
         return cls(
             app_name=os.getenv("INKDADDY_APP_NAME", "inkDaddy"),
-            version=os.getenv("INKDADDY_VERSION", "0.1.0"),
+            version=os.getenv("INKDADDY_VERSION", "0.1.1"),
             host=os.getenv("INKDADDY_HOST", "0.0.0.0"),
             port=int(os.getenv("INKDADDY_PORT", "8080")),
             data_dir=data_dir,

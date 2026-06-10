@@ -3,7 +3,11 @@ import { Shell } from "./components/Shell";
 import { display } from "./lib/mockData";
 import type { RouteKey } from "./lib/types";
 import { Connect } from "./pages/Connect";
+import { DevicesPage } from "./pages/Devices";
+import { HomeAssistantPage } from "./pages/HomeAssistant";
 import { Home } from "./pages/Home";
+import { IntegrationsPage } from "./pages/Integrations";
+import { PhotosPage } from "./pages/Photos";
 import { SimplePage } from "./pages/SimplePages";
 
 const routes: RouteKey[] = [
@@ -11,6 +15,7 @@ const routes: RouteKey[] = [
   "connect",
   "photos",
   "dashboards",
+  "integrations",
   "devices",
   "home-assistant",
   "settings",
@@ -52,7 +57,16 @@ export function App() {
       </div>
       {route === "home" && <Home display={display} onConnect={() => setRoute("connect")} />}
       {route === "connect" && <Connect />}
-      {route !== "home" && route !== "connect" && <SimplePage route={route} />}
+      {route === "photos" && <PhotosPage />}
+      {route === "integrations" && <IntegrationsPage />}
+      {route === "devices" && <DevicesPage />}
+      {route === "home-assistant" && <HomeAssistantPage />}
+      {route !== "home" &&
+        route !== "connect" &&
+        route !== "photos" &&
+        route !== "integrations" &&
+        route !== "devices" &&
+        route !== "home-assistant" && <SimplePage route={route} />}
     </Shell>
   );
 }

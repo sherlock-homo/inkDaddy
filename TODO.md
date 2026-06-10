@@ -33,8 +33,10 @@
 - [x] Add image palette conversion and packed raw frame helpers.
 - [x] Add deterministic ePaper preview and provisioning-screen renderer.
 - [x] Add photo API placeholders.
-- [ ] Persist uploads to originals/processed/previews/frames.
-- [ ] Add EXIF orientation, crop, fit, fill, playlists, albums, delete, rename, reorder.
+- [x] Replace photo placeholders with SQLite-backed upload, metadata, preview, and raw-frame endpoints.
+- [x] Add album create/list/detail/reorder APIs for photo playlists.
+- [x] Persist uploads to originals/processed/previews/frames.
+- [x] Add EXIF orientation, crop, fit, fill, playlists, albums, delete, rename, reorder.
 
 ## Phase 4 - Dashboard Schema And Renderer
 
@@ -49,8 +51,10 @@
 - [x] Add HA API service helpers and token redaction.
 - [x] Add HA config/test/entities API skeleton.
 - [x] Document token-paste workflow.
-- [ ] Persist validated HA token in restricted secrets store.
-- [ ] Fetch and cache HA entities/devices from a live HA instance.
+- [x] Add generic integrations API/UI section with Home Assistant status.
+- [x] Replace HA placeholders with persisted config, restricted token storage, live validation, and entity cache refresh.
+- [x] Persist validated HA token in restricted secrets store.
+- [x] Fetch and cache HA entities/devices from a live HA instance.
 
 ## Phase 6 - Modern Purple UI
 
@@ -65,7 +69,9 @@
 - [x] Add simulator script.
 - [x] Add device heartbeat, manifest, frame, config, and refresh-result API skeleton.
 - [x] Add unjoined Matter join-screen alternation tests.
-- [ ] Exercise simulator against a running hub.
+- [x] Replace device placeholders with SQLite-backed registry, heartbeat history, display assignment, and per-device frame publishing.
+- [x] Add UI for device registration, simulator creation, refresh interval/content selection, and status history.
+- [x] Exercise simulator against a running hub.
 
 ## Phase 8 - XIAO MG24 SiSDK Firmware MVP
 
